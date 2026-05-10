@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>売上かんたん管理｜無料版</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Tokumin:wght@400;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --charcoal: #1a1a1a;
+  --ink: #2c2c2c;
+  --ember: #e85d04;
+  --ember-dark: #c44d00;
+  --ember-glow: rgba(232,93,4,0.15);
+  --gold: #f4a01c;
+  --cream: #fdf6ec;
+  --smoke: #f5f0e8;
+  --mist: #ede8df;
+  --ash: #8a8070;
+  --safe: #2d8c5e;
+  --safe-bg: rgba(45,140,94,0.12);
+  --danger: #c0392b;
+  --danger-bg: rgba(192,57,43,0.1);
+  --card-shadow: 0 2px 12px rgba(26,26,26,0.12);
+  --card-shadow-hover: 0 6px 24px rgba(26,26,26,0.2);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--smoke);
+  color: var(--charcoal);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: var(--charcoal);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 3px solid var(--ember);
+}
+.header-logo {
+  font-family: 'Kaisei Tokumin', serif;
+  font-size: 16px;
+  color: var(--cream);
+  letter-spacing: 0.05em;
+}
+.header-logo span { color: var(--ember); font-size: 20px; }
+.header-badge {
+  background: var(--ember);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.08em;
+}
+.header-time {
+  font-family: 'Oswald', sans-serif;
+  color: var(--gold);
+  font-size: 18px;
+  letter-spacing: 0.05em;
+}
+
+/* ===== TABS ===== */
+.tabs {
+  display: flex;
+  background: var(--ink);
+  border-bottom: 1px solid #333;
+}
+.tab-btn {
+  flex: 1;
+  padding: 11px 4px;
+  border: none;
+  background: transparent;
+  color: var(--ash);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+  letter-spacing: 0.05em;
+}
+.tab-btn.active {
+  color: var(--ember);
+  border-bottom-color: var(--ember);
+  background: rgba(232,93,4,0.08);
+}
+
+/* ===== PAGES ===== */
+.page { display: none; padding: 12px; }
+.page.active { display: block; }
+
+/* ===== CARDS ===== */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: var(--card-shadow);
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ash);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--mist);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 12px;
+  background: var(--ember);
+  border-radius: 2px;
+}
+
+/* ===== EVENT INFO ===== */
+.event-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.event-inputs input, .event-inputs select {
+  padding: 9px 10px;
+  border: 1.5px solid var(--mist);
+  border-radius: 8px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px;
+  color: var(--charcoal);
+  background: var(--smoke);
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.event-inputs input:focus, .event-inputs select:focus {
+  border-color: var(--ember);
+  background: white;
+}
+.event-inputs .full { grid-column: 1 / -1; }
+
+/* ===== MENU GRID ===== */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.menu-btn {
+  background: white;
+  border: 2px solid var(--mist);
+  border-radius: 12px;
+  padding: 12px 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+.menu-btn:active { transform: scale(0.96); }
+.menu-btn.in-cart {
+  border-color: var(--ember);
+  background: var(--ember-glow);
+}
+.menu-btn-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--charcoal);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.menu-btn-price {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  color: var(--ember);
+  font-weight: 600;
+}
+.menu-btn-price span { font-size: 10px; color: var(--ash); }
+.cart-badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: var(--ember);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Oswald', sans-serif;
+}
+
+/* ===== CART ===== */
+.cart-section { margin-top: 12px; }
+.cart-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--mist);
+}
+.cart-item-name { font-size: 12px; font-weight: 500; flex: 1; }
+.cart-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.qty-btn {
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid var(--mist);
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--charcoal);
+  transition: all 0.1s;
+}
+.qty-btn:active { background: var(--smoke); transform: scale(0.9); }
+.qty-num {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  width: 24px;
+  text-align: center;
+}
+.cart-item-subtotal {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--charcoal);
+  width: 64px;
+  text-align: right;
+}
+
+/* ===== PAYMENT ===== */
+.payment-btns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.pay-btn {
+  padding: 10px 4px;
+  border: 2px solid var(--mist);
+  border-radius: 10px;
+  background: white;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--charcoal);
+  text-align: center;
+}
+.pay-btn.selected {
+  border-color: var(--ember);
+  background: var(--ember);
+  color: white;
+}
+
+/* ===== DISCOUNT ===== */
+.discount-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.discount-row label { font-size: 12px; font-weight: 700; color: var(--ash); white-space: nowrap; }
+.discount-row input {
+  flex: 1;
+  padding: 9px 10px;
+  border: 1.5px solid var(--mist);
+  border-radius: 8px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 15px;
+  color: var(--charcoal);
+  text-align: right;
+  outline: none;
+}
+.discount-row input:focus { border-color: var(--ember); }
+
+/* ===== TOTAL ===== */
+.total-box {
+  background: var(--charcoal);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.total-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ash);
+  letter-spacing: 0.15em;
+}
+.total-amount {
+  font-family: 'Oswald', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: white;
+}
+.total-amount span { font-size: 14px; color: var(--ash); margin-left: 3px; }
+
+/* ===== CONFIRM BTN ===== */
+.confirm-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--ember);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.05em;
+}
+.confirm-btn:active { transform: scale(0.98); background: var(--ember-dark); }
+.confirm-btn:disabled { background: var(--mist); color: var(--ash); cursor: not-allowed; }
+
+/* ===== CLEAR BTN ===== */
+.clear-btn {
+  width: 100%;
+  padding: 11px;
+  background: transparent;
+  color: var(--ash);
+  border: 1.5px solid var(--mist);
+  border-radius: 10px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.15s;
+}
+.clear-btn:active { background: var(--smoke); }
+
+/* ===== COST PAGE ===== */
+.cost-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.cost-row label { display: none; }
+.cost-row input {
+  padding: 9px 10px;
+  border: 1.5px solid var(--mist);
+  border-radius: 8px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  color: var(--charcoal);
+  outline: none;
+  background: var(--smoke);
+  width: 100%;
+  min-width: 0;
+}
+.cost-row input[type="number"] {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  text-align: right;
+}
+.cost-row input:focus { border-color: var(--ember); background: white; }
+.cost-row .unit { font-size: 12px; color: var(--ash); white-space: nowrap; }
+
+.add-cost-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--smoke);
+  border: 1.5px dashed var(--mist);
+  border-radius: 8px;
+  color: var(--ash);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.15s;
+}
+.add-cost-btn:active { background: var(--mist); }
+
+/* ===== SUMMARY ===== */
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--mist);
+  font-size: 13px;
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-row .label { color: var(--ash); font-weight: 500; }
+.summary-row .value {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--charcoal);
+}
+.summary-row.profit .value { color: var(--safe); }
+.summary-row.loss .value { color: var(--danger); }
+.summary-row.total-sales { background: var(--ember-glow); border-radius: 8px; padding: 10px 8px; margin: 4px -8px; }
+.summary-row.total-sales .label { font-weight: 700; color: var(--charcoal); font-size: 13px; }
+.summary-row.total-sales .value { font-size: 20px; color: var(--ember); }
+
+.profit-banner {
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+.profit-banner.positive { background: var(--safe-bg); border: 1.5px solid var(--safe); }
+.profit-banner.negative { background: var(--danger-bg); border: 1.5px solid var(--danger); }
+.profit-banner .p-label { font-size: 12px; font-weight: 700; }
+.profit-banner.positive .p-label { color: var(--safe); }
+.profit-banner.negative .p-label { color: var(--danger); }
+.profit-banner .p-amount {
+  font-family: 'Oswald', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+}
+.profit-banner.positive .p-amount { color: var(--safe); }
+.profit-banner.negative .p-amount { color: var(--danger); }
+
+/* ===== PAYMENT SUMMARY ===== */
+.pay-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+.pay-item {
+  background: var(--smoke);
+  border-radius: 8px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.pay-item-label { font-size: 10px; color: var(--ash); font-weight: 700; margin-bottom: 4px; }
+.pay-item-value { font-family: 'Oswald', sans-serif; font-size: 14px; font-weight: 600; color: var(--charcoal); }
+
+/* ===== ORDER COUNT ===== */
+.order-count-badge {
+  background: var(--ember);
+  color: white;
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-left: auto;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,26,26,0.75);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: white;
+  border-radius: 20px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  animation: modalPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalPop {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.modal-icon { font-size: 48px; margin-bottom: 12px; }
+.modal-title {
+  font-family: 'Kaisei Tokumin', serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+}
+.modal-amount {
+  font-family: 'Oswald', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--ember);
+  margin-bottom: 4px;
+}
+.modal-amount span { font-size: 18px; color: var(--ash); }
+.modal-payment {
+  font-size: 13px;
+  color: var(--ash);
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+.modal-close {
+  width: 100%;
+  padding: 13px;
+  background: var(--charcoal);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== UPGRADE BANNER ===== */
+.upgrade-banner {
+  background: linear-gradient(135deg, var(--charcoal), #3a3020);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--gold);
+  position: relative;
+  overflow: hidden;
+}
+.upgrade-banner::before {
+  content: '✦';
+  position: absolute;
+  right: 16px;
+  top: 12px;
+  color: var(--gold);
+  font-size: 28px;
+  opacity: 0.5;
+}
+.upgrade-banner h3 {
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+.upgrade-banner p {
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+.upgrade-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+.feature-tag {
+  background: rgba(244,160,28,0.2);
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(244,160,28,0.4);
+}
+.upgrade-btn {
+  display: block;
+  width: 100%;
+  padding: 11px;
+  background: var(--gold);
+  color: var(--charcoal);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+/* ===== ITEM SUMMARY ===== */
+.item-summary { margin-top: 8px; }
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--mist);
+}
+.item-row:last-child { border-bottom: none; }
+.item-row .iname { color: var(--charcoal); font-weight: 500; }
+.item-row .iqty { color: var(--ash); font-family: 'Oswald', sans-serif; }
+.item-row .iamt { font-family: 'Oswald', sans-serif; font-weight: 600; }
+
+/* ===== MENU EDIT ===== */
+.menu-edit-row {
+  display: grid;
+  grid-template-columns: 1fr 80px auto;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 7px;
+}
+.menu-edit-row input {
+  padding: 10px 10px;
+  border: 1.5px solid var(--mist);
+  border-radius: 8px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  outline: none;
+  background: var(--smoke);
+  transition: border-color 0.2s;
+  width: 100%;
+  min-width: 0;
+}
+.menu-edit-row input:focus { border-color: var(--ember); background: white; }
+.menu-edit-row .name-input { }
+.menu-edit-row .price-input { font-family: 'Oswald', sans-serif; font-size: 14px; text-align: right; }
+.del-btn {
+  width: 28px;
+  height: 28px;
+  background: var(--danger-bg);
+  border: none;
+  border-radius: 6px;
+  color: var(--danger);
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.save-menu-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--safe);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.15s;
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--charcoal);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  z-index: 2000;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ===== SECTION HEADING ===== */
+.section-note {
+  font-size: 11px;
+  color: var(--ash);
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo"><span>🍗</span> 売上かんたん管理</div>
+  <div class="header-badge">無料版</div>
+  <div class="header-time" id="clock">--:--</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('pos')">注文入力</button>
+  <button class="tab-btn" onclick="switchTab('cost')">経費・原価</button>
+  <button class="tab-btn" onclick="switchTab('report')">日報</button>
+  <button class="tab-btn" onclick="switchTab('menu')">商品設定</button>
+</div>
+
+<!-- ===== PAGE: POS ===== -->
+<div class="page active" id="page-pos">
+
+  <!-- イベント情報 -->
+  <div class="card">
+    <div class="card-title">今日のイベント情報</div>
+    <div class="event-inputs">
+      <input type="text" id="eventName" placeholder="イベント名" class="full">
+      <input type="date" id="eventDate">
+      <input type="text" id="eventVenue" placeholder="会場名">
+    </div>
+  </div>
+
+  <!-- 商品ボタン -->
+  <div class="card">
+    <div class="card-title">
+      商品を選択
+      <span class="order-count-badge" id="orderCountBadge" style="display:none"></span>
+    </div>
+    <div class="menu-grid" id="menuGrid"></div>
+  </div>
+
+  <!-- カート -->
+  <div class="card" id="cartCard" style="display:none">
+    <div class="card-title">注文内容</div>
+    <div id="cartItems"></div>
+  </div>
+
+  <!-- 決済方法 -->
+  <div class="card">
+    <div class="card-title">決済方法</div>
+    <div class="payment-btns">
+      <button class="pay-btn selected" onclick="selectPay(this,'現金')">💴 現金</button>
+      <button class="pay-btn" onclick="selectPay(this,'PayPay')">📱 PayPay</button>
+      <button class="pay-btn" onclick="selectPay(this,'クレジット')">💳 クレジット</button>
+      <button class="pay-btn" onclick="selectPay(this,'交通系IC')">🚃 交通系IC</button>
+      <button class="pay-btn" onclick="selectPay(this,'d払い')">🔵 d払い</button>
+      <button class="pay-btn" onclick="selectPay(this,'その他')">🔖 その他</button>
+    </div>
+
+    <div class="discount-row">
+      <label>値引き</label>
+      <input type="number" id="discount" value="0" min="0" step="10" oninput="updateTotal()">
+      <span class="unit">円</span>
+    </div>
+
+    <div class="total-box">
+      <div class="total-label">TOTAL</div>
+      <div class="total-amount" id="totalAmount">0<span>円</span></div>
+    </div>
+
+    <button class="confirm-btn" id="confirmBtn" onclick="confirmOrder()" disabled>注文を確定する</button>
+    <button class="clear-btn" onclick="clearCart()">🗑 クリア</button>
+  </div>
+
+</div>
+
+<!-- ===== PAGE: COST ===== -->
+<div class="page" id="page-cost">
+
+  <div class="card">
+    <div class="card-title">材料費（原価）</div>
+    <div class="section-note">今日使った材料の費用を入力してください。</div>
+    <div id="materialRows">
+      <div class="cost-row">
+        <input type="text" placeholder="材料名（例：鶏肉）" oninput="updateReport()">
+        <input type="number" placeholder="金額" oninput="updateReport()">
+        <span class="unit">円</span>
+      </div>
+    </div>
+    <button class="add-cost-btn" onclick="addMaterialRow()">＋ 材料を追加</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">経費</div>
+    <div class="section-note">出店料・交通費・人件費など</div>
+    <div id="expenseRows">
+      <div class="cost-row">
+        <input type="text" placeholder="経費名（例：出店料）" oninput="updateReport()">
+        <input type="number" placeholder="金額" oninput="updateReport()">
+        <span class="unit">円</span>
+      </div>
+    </div>
+    <button class="add-cost-btn" onclick="addExpenseRow()">＋ 経費を追加</button>
+  </div>
+
+</div>
+
+<!-- ===== PAGE: REPORT ===== -->
+<div class="page" id="page-report">
+
+  <div class="card">
+    <div class="card-title">売上サマリー</div>
+    <div class="summary-row total-sales">
+      <span class="label">総売上</span>
+      <span class="value" id="rTotalSales">¥0</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">注文件数</span>
+      <span class="value" id="rOrderCount">0件</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">客単価</span>
+      <span class="value" id="rAvgOrder">¥0</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">決済別内訳</div>
+    <div class="pay-summary-grid" id="rPaySummary"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">商品別販売数</div>
+    <div class="item-summary" id="rItemSummary"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">利益計算</div>
+    <div class="summary-row">
+      <span class="label">総売上</span>
+      <span class="value" id="rSales2">¥0</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">材料費合計</span>
+      <span class="value" id="rMaterial">¥0</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">経費合計</span>
+      <span class="value" id="rExpense">¥0</span>
+    </div>
+    <div class="summary-row">
+      <span class="label">粗利益</span>
+      <span class="value" id="rGrossProfit">¥0</span>
+    </div>
+  </div>
+
+  <!-- 利益バナー -->
+  <div class="profit-banner positive" id="profitBanner">
+    <div>
+      <div class="p-label" id="profitLabel">本日の利益</div>
+      <div style="font-size:11px;color:#666;margin-top:2px" id="profitMargin">利益率 0%</div>
+    </div>
+    <div class="p-amount" id="profitAmount">¥0</div>
+  </div>
+
+  <!-- アップグレード訴求 -->
+  <div class="upgrade-banner">
+    <h3>📊 もっと詳しく分析・管理したいなら</h3>
+    <p>Excel出力・現金実査・複数日集計・データ保存・過去イベント比較など、現場で本当に必要な機能が揃ったフル版があります。13年の現場経験を持つ現役オーナーが作った、催事・屋台専用の本格ツールです。</p>
+    <div class="upgrade-features">
+      <span class="feature-tag">Excel出力</span>
+      <span class="feature-tag">現金実査</span>
+      <span class="feature-tag">複数日集計</span>
+      <span class="feature-tag">データ保存</span>
+      <span class="feature-tag">履歴管理</span>
+      <span class="feature-tag">出店判断</span>
+    </div>
+    <button class="upgrade-btn" onclick="window.open('https://lin.ee/XXXXXXX','_blank')">📲 購入者専用LINEで詳細を見る →</button>
+  </div>
+
+</div>
+
+<!-- ===== PAGE: MENU ===== -->
+<div class="page" id="page-menu">
+  <div class="card">
+    <div class="card-title">商品リスト編集</div>
+    <div class="section-note">商品名と価格を自由に変更できます。</div>
+    <div id="menuEditRows"></div>
+    <button class="add-cost-btn" onclick="addMenuEditRow()">＋ 商品を追加</button>
+    <button class="save-menu-btn" onclick="saveMenu()">✓ 保存して反映</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-icon">✅</div>
+    <div class="modal-title">確定しました</div>
+    <div class="modal-amount" id="modalAmount">¥0<span>円</span></div>
+    <div class="modal-payment" id="modalPayment"></div>
+    <button class="modal-close" onclick="closeModal()">次の注文へ</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+let menu = [
+  { name: 'しお唐揚げ', price: 486 },
+  { name: 'もも唐揚げ', price: 486 },
+  { name: 'ぼんじり', price: 594 },
+  { name: '砂肝', price: 594 },
+  { name: 'ハラミ', price: 594 },
+  { name: 'むねとろ', price: 594 },
+];
+let cart = {}; // { index: qty }
+let selectedPay = '現金';
+let orders = []; // { items:{}, total, pay, discount }
+
+// ===== CLOCK =====
+function updateClock() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ===== TABS =====
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (tab === 'report') updateReport();
+  if (tab === 'menu') renderMenuEdit();
+}
+
+// ===== MENU RENDER =====
+function renderMenu() {
+  const grid = document.getElementById('menuGrid');
+  grid.innerHTML = '';
+  menu.forEach((item, i) => {
+    const qty = cart[i] || 0;
+    const btn = document.createElement('button');
+    btn.className = 'menu-btn' + (qty > 0 ? ' in-cart' : '');
+    btn.innerHTML = `
+      <div class="menu-btn-name">${item.name}</div>
+      <div class="menu-btn-price">${item.price.toLocaleString()}<span>円</span></div>
+      ${qty > 0 ? `<div class="cart-badge">${qty}</div>` : ''}
+    `;
+    btn.onclick = () => addToCart(i);
+    grid.appendChild(btn);
+  });
+}
+
+function addToCart(i) {
+  cart[i] = (cart[i] || 0) + 1;
+  renderMenu();
+  renderCart();
+  updateTotal();
+}
+
+// ===== CART =====
+function renderCart() {
+  const keys = Object.keys(cart).filter(k => cart[k] > 0);
+  const cartCard = document.getElementById('cartCard');
+  const container = document.getElementById('cartItems');
+  const badge = document.getElementById('orderCountBadge');
+
+  if (keys.length === 0) {
+    cartCard.style.display = 'none';
+    badge.style.display = 'none';
+    return;
+  }
+  cartCard.style.display = 'block';
+  badge.style.display = 'inline-flex';
+  badge.textContent = keys.length + '種';
+
+  container.innerHTML = '';
+  keys.forEach(k => {
+    const item = menu[parseInt(k)];
+    const qty = cart[k];
+    const row = document.createElement('div');
+    row.className = 'cart-item';
+    row.innerHTML = `
+      <div class="cart-item-name">${item.name}</div>
+      <div class="cart-controls">
+        <button class="qty-btn" onclick="changeQty(${k},-1)">−</button>
+        <div class="qty-num">${qty}</div>
+        <button class="qty-btn" onclick="changeQty(${k},1)">＋</button>
+      </div>
+      <div class="cart-item-subtotal">¥${(item.price * qty).toLocaleString()}</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function changeQty(i, delta) {
+  const newQty = (cart[i] || 0) + delta;
+  if (newQty <= 0) delete cart[i];
+  else cart[i] = newQty;
+  renderMenu();
+  renderCart();
+  updateTotal();
+}
+
+// ===== PAYMENT =====
+function selectPay(btn, method) {
+  document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedPay = method;
+}
+
+// ===== TOTAL =====
+function updateTotal() {
+  const subtotal = Object.keys(cart).reduce((sum, k) => {
+    return sum + (menu[parseInt(k)].price * cart[k]);
+  }, 0);
+  const disc = parseInt(document.getElementById('discount').value) || 0;
+  const total = Math.max(0, subtotal - disc);
+  document.getElementById('totalAmount').innerHTML = total.toLocaleString() + '<span>円</span>';
+  document.getElementById('confirmBtn').disabled = (total <= 0);
+}
+
+function clearCart() {
+  cart = {};
+  document.getElementById('discount').value = 0;
+  renderMenu();
+  renderCart();
+  updateTotal();
+}
+
+// ===== CONFIRM =====
+function confirmOrder() {
+  const subtotal = Object.keys(cart).reduce((sum, k) => {
+    return sum + (menu[parseInt(k)].price * cart[k]);
+  }, 0);
+  const disc = parseInt(document.getElementById('discount').value) || 0;
+  const total = Math.max(0, subtotal - disc);
+
+  // Save order
+  const snapshot = {};
+  Object.keys(cart).forEach(k => { snapshot[k] = cart[k]; });
+  orders.push({ items: snapshot, total: total, pay: selectedPay, discount: disc });
+
+  // Modal
+  document.getElementById('modalAmount').innerHTML = '¥' + total.toLocaleString() + '<span></span>';
+  document.getElementById('modalPayment').textContent = selectedPay + ' でお支払い';
+  document.getElementById('modalOverlay').classList.add('show');
+
+  // Clear
+  clearCart();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// ===== COST ROWS =====
+function addMaterialRow() {
+  const row = document.createElement('div');
+  row.className = 'cost-row';
+  row.innerHTML = `
+    <input type="text" placeholder="材料名（例：油）" oninput="updateReport()">
+    <input type="number" placeholder="金額" oninput="updateReport()">
+    <span class="unit">円</span>
+    <button class="del-btn" onclick="this.parentElement.remove();updateReport()">×</button>
+  `;
+  document.getElementById('materialRows').appendChild(row);
+}
+
+function addExpenseRow() {
+  const row = document.createElement('div');
+  row.className = 'cost-row';
+  row.innerHTML = `
+    <input type="text" placeholder="経費名（例：駐車場）" oninput="updateReport()">
+    <input type="number" placeholder="金額" oninput="updateReport()">
+    <span class="unit">円</span>
+    <button class="del-btn" onclick="this.parentElement.remove();updateReport()">×</button>
+  `;
+  document.getElementById('expenseRows').appendChild(row);
+}
+
+// ===== REPORT =====
+function updateReport() {
+  const totalSales = orders.reduce((s, o) => s + o.total, 0);
+  const orderCount = orders.length;
+  const avgOrder = orderCount > 0 ? Math.round(totalSales / orderCount) : 0;
+
+  document.getElementById('rTotalSales').textContent = '¥' + totalSales.toLocaleString();
+  document.getElementById('rSales2').textContent = '¥' + totalSales.toLocaleString();
+  document.getElementById('rOrderCount').textContent = orderCount + '件';
+  document.getElementById('rAvgOrder').textContent = '¥' + avgOrder.toLocaleString();
+
+  // 決済別
+  const payMap = {};
+  orders.forEach(o => { payMap[o.pay] = (payMap[o.pay] || 0) + o.total; });
+  const paySummary = document.getElementById('rPaySummary');
+  paySummary.innerHTML = '';
+  const payMethods = ['現金','PayPay','クレジット','交通系IC','d払い','その他'];
+  payMethods.forEach(m => {
+    const amt = payMap[m] || 0;
+    if (amt === 0 && !payMap[m]) return;
+    const el = document.createElement('div');
+    el.className = 'pay-item';
+    el.innerHTML = `<div class="pay-item-label">${m}</div><div class="pay-item-value">¥${amt.toLocaleString()}</div>`;
+    paySummary.appendChild(el);
+  });
+  if (paySummary.children.length === 0) {
+    paySummary.innerHTML = '<div style="font-size:12px;color:#aaa;padding:8px;grid-column:1/-1">まだ注文がありません</div>';
+  }
+
+  // 商品別
+  const itemMap = {};
+  orders.forEach(o => {
+    Object.keys(o.items).forEach(k => {
+      const name = menu[parseInt(k)]?.name || '不明';
+      itemMap[name] = (itemMap[name] || {qty:0, amt:0});
+      itemMap[name].qty += o.items[k];
+      itemMap[name].amt += o.items[k] * (menu[parseInt(k)]?.price || 0);
+    });
+  });
+  const itemSummary = document.getElementById('rItemSummary');
+  itemSummary.innerHTML = '';
+  if (Object.keys(itemMap).length === 0) {
+    itemSummary.innerHTML = '<div style="font-size:12px;color:#aaa;padding:8px">まだ注文がありません</div>';
+  } else {
+    Object.entries(itemMap).sort((a,b) => b[1].qty - a[1].qty).forEach(([name, d]) => {
+      const row = document.createElement('div');
+      row.className = 'item-row';
+      row.innerHTML = `
+        <span class="iname">${name}</span>
+        <span class="iqty">${d.qty}個</span>
+        <span class="iamt">¥${d.amt.toLocaleString()}</span>
+      `;
+      itemSummary.appendChild(row);
+    });
+  }
+
+  // 原価・経費
+  let material = 0;
+  document.querySelectorAll('#materialRows input[type="number"]').forEach(el => {
+    material += parseInt(el.value) || 0;
+  });
+  let expense = 0;
+  document.querySelectorAll('#expenseRows input[type="number"]').forEach(el => {
+    expense += parseInt(el.value) || 0;
+  });
+  const grossProfit = totalSales - material - expense;
+  document.getElementById('rMaterial').textContent = '¥' + material.toLocaleString();
+  document.getElementById('rExpense').textContent = '¥' + expense.toLocaleString();
+  document.getElementById('rGrossProfit').textContent = '¥' + grossProfit.toLocaleString();
+
+  // 利益バナー
+  const banner = document.getElementById('profitBanner');
+  const profitAmt = document.getElementById('profitAmount');
+  const profitLbl = document.getElementById('profitLabel');
+  const profitMgn = document.getElementById('profitMargin');
+  const margin = totalSales > 0 ? Math.round(grossProfit / totalSales * 100) : 0;
+
+  profitAmt.textContent = (grossProfit >= 0 ? '¥' : '▲¥') + Math.abs(grossProfit).toLocaleString();
+  profitMgn.textContent = '利益率 ' + margin + '%';
+
+  if (grossProfit >= 0) {
+    banner.className = 'profit-banner positive';
+    profitLbl.textContent = '本日の利益';
+  } else {
+    banner.className = 'profit-banner negative';
+    profitLbl.textContent = '本日の損失';
+  }
+}
+
+// ===== MENU EDIT =====
+function renderMenuEdit() {
+  const container = document.getElementById('menuEditRows');
+  container.innerHTML = '';
+  menu.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'menu-edit-row';
+    row.innerHTML = `
+      <input type="text" class="name-input" value="${item.name}" placeholder="商品名">
+      <input type="number" class="price-input" value="${item.price}" placeholder="価格" style="text-align:right;font-family:'Oswald',sans-serif">
+      <button class="del-btn" onclick="removeMenuRow(${i})">×</button>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function removeMenuRow(i) {
+  menu.splice(i, 1);
+  renderMenuEdit();
+}
+
+function addMenuEditRow() {
+  const row = document.createElement('div');
+  row.className = 'menu-edit-row';
+  row.innerHTML = `
+    <input type="text" class="name-input" placeholder="新しい商品名">
+    <input type="number" class="price-input" placeholder="価格" style="text-align:right;font-family:'Oswald',sans-serif">
+    <button class="del-btn" onclick="this.parentElement.remove()">×</button>
+  `;
+  document.getElementById('menuEditRows').appendChild(row);
+}
+
+function saveMenu() {
+  const rows = document.querySelectorAll('#menuEditRows .menu-edit-row');
+  const newMenu = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const name = inputs[0].value.trim();
+    const price = parseInt(inputs[1].value) || 0;
+    if (name && price > 0) newMenu.push({ name, price });
+  });
+  if (newMenu.length === 0) {
+    showToast('最低1つの商品を入力してください');
+    return;
+  }
+  menu = newMenu;
+  cart = {};
+  renderMenu();
+  showToast('✓ 商品リストを保存しました');
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ===== INIT =====
+renderMenu();
+updateTotal();
+updateReport();
+</script>
+</body>
+</html>
